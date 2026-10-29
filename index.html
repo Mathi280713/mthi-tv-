@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<style>html,body{margin:0;padding:0}</style></head><body>
+<title>Mthi TV</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root{--bg:#0b0f14;--bg2:#131a22;--card:#19222d;--ln:rgba(255,255,255,.09);--tx:#eef3f8;--mut:#8b9bad;--ac:#ff4d5e;--ok:#32d583;--am:#f5b73b}
+@media (prefers-color-scheme:light){:root{--bg:#f3f5f8;--bg2:#e6ebf1;--card:#fff;--ln:rgba(0,0,0,.1);--tx:#101820;--mut:#5d6c7d;--ac:#e0243a;--ok:#0e9d5c;--am:#c78100}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+#app{height:100dvh;display:flex;flex-direction:column;max-width:900px;margin:0 auto}
+header{padding:max(12px,env(safe-area-inset-top)) 16px 8px;display:flex;align-items:center;gap:10px}
+h1{margin:0;font-size:21px;flex:1;letter-spacing:-.3px}h1 b{color:var(--ac)}
+.ib{background:var(--bg2);border:1px solid var(--ln);color:var(--tx);border-radius:12px;padding:8px 12px;font-size:13px;font-weight:600}
+#stage{position:relative;background:#000;aspect-ratio:16/9;width:100%;overflow:hidden}
+#stage video,#stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+#ov{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;opacity:0;transition:.25s;background:linear-gradient(#000a,transparent 30%,transparent 70%,#000a);color:#fff}
+#ov.on{opacity:1}#ov .t{padding:10px 14px;display:flex;align-items:center;gap:10px;font-weight:700}#ov .b{display:flex;justify-content:center;align-items:center;gap:18px;padding:10px}
+#ov button{background:#0007;border:1px solid #fff4;color:#fff;border-radius:50%;width:46px;height:46px;font-size:18px}
+#msg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#fff;text-align:center;padding:16px;font-size:14px;pointer-events:none}#msg a,#msg button{pointer-events:auto}
+.live{background:var(--ac);color:#fff;font-size:10px;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:.5px}
+.sp{width:28px;height:28px;border:3px solid #fff4;border-top-color:#fff;border-radius:50%;animation:sp .8s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+.btn{display:inline-block;background:var(--ac);color:#fff;border:0;border-radius:20px;padding:9px 18px;font-weight:700;font-size:14px;text-decoration:none}
+.tabs{display:flex;gap:6px;padding:10px 16px 4px;overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;border:1px solid var(--ln);background:var(--bg2);color:var(--mut);padding:7px 14px;border-radius:18px;font-size:13px;font-weight:600}.tab.on{background:var(--tx);color:var(--bg);border-color:transparent}
+#list{flex:1;overflow-y:auto;padding:6px 12px max(20px,env(safe-area-inset-bottom))}
+.ch{display:flex;align-items:center;gap:12px;padding:9px 8px;border-radius:14px}.ch:active,.ch.cur{background:var(--bg2)}
+.lg{width:58px;height:40px;border-radius:9px;background:#fff;flex:none;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;overflow:hidden}.lg img{max-width:100%;max-height:100%;object-fit:contain}
+.mt{flex:1;min-width:0}.mt b{display:block;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mt small{color:var(--mut);font-size:12px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--mut);flex:none}.dot.ok{background:var(--ok)}.dot.bad{background:var(--ac)}.dot.chk{background:var(--am)}
+.hb{background:none;border:0;font-size:21px;color:var(--mut);padding:4px 6px}.hb.on{color:var(--ac)}
+.note{color:var(--mut);font-size:12.5px;line-height:1.5;padding:10px 8px}
+h3{margin:14px 8px 4px;font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--mut)}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:30px;background:#000c;color:#fff;padding:9px 16px;border-radius:18px;font-size:13px;opacity:0;transition:.3s;pointer-events:none;z-index:9}#toast.on{opacity:1}
+#stage:fullscreen{aspect-ratio:auto;height:100%}
+@media (orientation:landscape) and (max-height:520px){#app{flex-direction:row;max-width:none}#side{width:42%;display:flex;flex-direction:column;min-height:0}#stage{width:58%;height:100dvh;aspect-ratio:auto}header{padding-top:8px}}
+#side{display:flex;flex-direction:column;flex:1;min-height:0;min-width:0}
+</style>
+<div id="app">
+<div id="stage"><video id="v" playsinline controlslist="nodownload"></video><iframe id="yt" allow="autoplay;fullscreen;encrypted-media;picture-in-picture" allowfullscreen style="display:none"></iframe><div id="msg"><div style="font-size:40px">📺</div>Elige un canal</div>
+<div id="ov"><div class="t"><span class="live">EN VIVO</span><span id="ovn"></span></div><div class="b"><button id="pv">▲</button><button id="pp">⏸</button><button id="nx">▼</button><button id="fs">⛶</button></div></div></div>
+<div id="side"><header><h1>📺 Mthi <b>TV</b></h1><button class="ib" id="vf">✔ Verificar señales</button></header>
+<div class="tabs" id="tabs"></div><div id="list"></div></div></div>
+<div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s),v=$('#v'),yt=$('#yt');
+const lsG=(k,d)=>{try{const x=localStorage.getItem(k);return x?JSON.parse(x):d}catch(e){return d}},lsS=(k,x)=>{try{localStorage.setItem(k,JSON.stringify(x))}catch(e){}};
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('on'),2400)};
+/* Canales oficiales: páginas de transmisión en vivo de cada canal (se abren en el navegador) */
+const OFICIAL=[
+ {n:'Teletica Canal 7',m:'T7',w:'https://www.teletica.com/vivo',yt:'UCOC6n5gbktagxIUrQrp42yw'},
+ {n:'Repretel Canal 6',m:'R6',w:'https://www.repretel.com/envivo-canal6/'},
+ {n:'Repretel Canal 11',m:'R11',w:'https://www.repretel.com/envivo-canal-11/'},
+ {n:'Repretel Canal 4',m:'R4',w:'https://www.repretel.com/envivo-canal4/'},
+ {n:'Repretel Canal 2',m:'R2',w:'https://www.repretel.com/envivo-canal2/'},
+ {n:'Canal 13 (SINART)',m:'C13',w:'https://sinartdigital.com/envivo-canaltrece'},
+ {n:'Quince UCR',m:'UCR',w:'https://quince.ucr.ac.cr/quinceucr/'},
+ {n:'Multimedios Costa Rica (8)',m:'M8',w:'https://www.multimediostv.com/en-vivo/costa-rica'},
+ {n:'¡OPA! Canal 38',m:'OPA',w:'https://genteopa.com/envivo/'},
+ {n:'Extra TV Canal 42',m:'X42',w:'https://www.diarioextra.com/extra-tv/'},
+ {n:'Trivisión Canal 36',m:'T36',w:'https://trivisioncr.com/tv-en-vivo/'},
+ {n:'TVN Canal 14',m:'T14',w:'https://www.tvn14.com/tv-en-vivo/'}
+];
+const SRC=['https://iptv-org.github.io/iptv/countries/cr.m3u','https://raw.githubusercontent.com/iptv-org/iptv/master/streams/cr.m3u'];
+let S={tab:'vivo',items:[],cur:null,fav:lsG('mt-fav',[]),chk:lsG('mt-chk',{}),hide:lsG('mt-hide',true),fails:0,loadingList:false};
+const hue=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%360;return h};
+function parse(txt){
+  const L=txt.split(/\r?\n/),out=[],seen=new Set();
+  for(let i=0;i<L.length;i++){const l=L[i];if(!l.startsWith('#EXTINF'))continue;
+    const name=(l.split(/,(?!.*,)/).pop()||'').trim(),logo=(l.match(/tvg-logo="([^"]*)"/)||[])[1]||'',grp=(l.match(/group-title="([^"]*)"/)||[])[1]||'';
+    let u='';for(let j=i+1;j<L.length;j++){if(L[j]&&!L[j].startsWith('#')){u=L[j].trim();break}}
+    if(!/^https:\/\//.test(u))continue;const key=name.replace(/\s*[\(\[].*?[\)\]]/g,'').toLowerCase();
+    const q=(name.match(/\((\d{3,4}p)\)/)||[])[1]||'',geo=/geo-?blocked/i.test(name),nf=/not 24\/7/i.test(name);
+    const clean=name.replace(/\s*[\(\[].*?[\)\]]/g,'').trim()||name;
+    if(seen.has(u))continue;seen.add(u);out.push({id:u,n:clean,u,l:/^https:/.test(logo)?logo:'',g:grp,q,geo,nf,kind:'hls'});
+  }
+  return out;
+}
+async function loadList(){
+  $('#list').innerHTML='<div class="note">Cargando canales…</div>';let txt=null;
+  for(const u of SRC){try{const c=new AbortController(),t=setTimeout(()=>c.abort(),10000);const r=await fetch(u,{signal:c.signal});clearTimeout(t);if(r.ok){txt=await r.text();break}}catch(e){}}
+  if(txt){S.items=parse(txt);lsS('mt-list',S.items)}else{S.items=lsG('mt-list',[]);if(S.items.length)toast('Sin internet: lista guardada')}
+  render();
+}
+const isFav=c=>S.fav.includes(c.id);
+function status(c){const k=S.chk[c.id];if(!k||Date.now()-k.t>864e5)return '';return k.ok?'ok':'bad'}
+function render(){
+  const L=$('#list');L.innerHTML='';
+  if(S.tab==='ofi'){L.innerHTML='<div class="note">Estas son las páginas oficiales de cada canal. Se abren en tu navegador porque los canales no permiten verse dentro de otra app.</div>';
+    OFICIAL.forEach(o=>{const d=row({id:'o:'+o.n,n:o.n,m:o.m,sub:o.yt?'Intenta verse aquí · o abre la página':'Abrir transmisión en vivo ↗'});d.onclick=()=>o.yt?playYT(o):window.open(o.w,'_blank','noopener');L.appendChild(d)});return}
+  let items=S.items;if(S.tab==='fav')items=S.items.filter(isFav);
+  if(S.hide&&S.tab!=='fav')items=items.filter(c=>status(c)!=='bad');
+  const checked=Object.keys(S.chk).length;
+  if(!items.length){L.innerHTML='<div class="note" style="text-align:center;padding:40px 16px">'+(S.tab==='fav'?'Toca el ♡ de un canal para guardarlo aquí.':'No hay canales para mostrar.<br>Toca «Verificar señales» o revisa tu internet.')+'</div>';return}
+  const note=document.createElement('div');note.className='note';note.textContent=S.tab==='fav'?'':'Señales gratuitas y públicas de Costa Rica. Algunas pueden estar caídas: toca «Verificar señales» para ver cuáles funcionan ahora.';if(note.textContent)L.appendChild(note);
+  items.forEach(c=>{const d=row(c,true);d.onclick=()=>play(c,items);L.appendChild(d)});
+}
+function row(c,live){
+  const d=document.createElement('div');d.className='ch'+(S.cur&&S.cur.id===c.id?' cur':'');
+  const lg=document.createElement('div');lg.className='lg';lg.style.background=`hsl(${hue(c.n)} 45% 38%)`;lg.textContent=c.m||c.n.slice(0,3).toUpperCase();
+  if(c.l){const im=new Image();im.referrerPolicy='no-referrer';im.onload=()=>{lg.textContent='';lg.style.background='#fff';lg.appendChild(im)};im.src=c.l}
+  const m=document.createElement('div');m.className='mt';m.innerHTML=`<b>${esc(c.n)}</b><small>${esc(c.sub||[c.g,c.q,c.geo?'Puede estar bloqueado por país':'',c.nf?'No siempre 24/7':''].filter(Boolean).join(' · ')||'En vivo')}</small>`;
+  d.append(lg,m);
+  if(live){const dot=document.createElement('span');dot.className='dot '+status(c);d.appendChild(dot);const h=document.createElement('button');h.className='hb'+(isFav(c)?' on':'');h.textContent=isFav(c)?'♥':'♡';h.onclick=e=>{e.stopPropagation();S.fav=isFav(c)?S.fav.filter(x=>x!==c.id):[...S.fav,c.id];lsS('mt-fav',S.fav);render()};d.appendChild(h)}
+  return d;
+}
+/* ---- reproducción ---- */
+let hls=null,hlsLoad=null;
+function loadHls(){if(window.Hls)return Promise.resolve();if(hlsLoad)return hlsLoad;return hlsLoad=new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js';s.onload=ok;s.onerror=()=>{hlsLoad=null;no()};document.head.appendChild(s)})}
+function attach(el,url,onErr){
+  const native=el.canPlayType('application/vnd.apple.mpegurl');
+  if(!/\.m3u8/i.test(url)||native){el.src=url;return null}
+  loadHls().then(()=>{if(!Hls.isSupported()){onErr();return}const h=new Hls({maxBufferLength:20});h.loadSource(url);h.attachMedia(el);h.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal)onErr()});el._h=h}).catch(onErr);return true;
+}
+function stop(){if(hls){hls.destroy();hls=null}v._h&&v._h.destroy();v._h=null;v.removeAttribute('src');v.load();yt.src='about:blank';yt.style.display='none';v.style.display=''}
+function msg(h){$('#msg').innerHTML=h}
+function play(c,list){
+  S.cur=c;if(list)S.queue=list;stop();S.fails=0;$('#ovn').textContent=c.n;msg('<div class="sp"></div>Conectando…');v.style.display='';
+  lsS('mt-last',c.id);const err=()=>{if(S.cur!==c)return;msg('📡 Sin señal ahora<br><small>Prueba otro canal</small>');S.chk[c.id]={ok:false,t:Date.now()};lsS('mt-chk',S.chk);dots()};
+  v._err=err;attach(v,c.u,err);v.muted=false;v.play().catch(()=>{});showOv();render();
+  if('mediaSession' in navigator)navigator.mediaSession.metadata=new MediaMetadata({title:c.n,artist:'Mthi TV'});
+}
+function playYT(o){stop();S.cur={id:'o:'+o.n,n:o.n};$('#ovn').textContent=o.n;v.style.display='none';yt.style.display='block';yt.src='https://www.youtube-nocookie.com/embed/live_stream?channel='+o.yt+'&autoplay=1&playsinline=1';msg(`<small style="background:#000a;padding:6px 12px;border-radius:12px;position:absolute;bottom:8px">Si no carga, <a style="color:#fff" href="${o.w}" target="_blank" rel="noopener">abre la página oficial ↗</a></small>`);$('#msg').style.pointerEvents='none';showOv()}
+v.addEventListener('playing',()=>{msg('');if(S.cur){S.chk[S.cur.id]={ok:true,t:Date.now()};lsS('mt-chk',S.chk);dots()}});
+v.addEventListener('waiting',()=>{if(S.cur&&!v.paused)msg('<div class="sp"></div>')});
+v.addEventListener('error',()=>{v._err&&v._err()});
+v.addEventListener('stalled',()=>{});
+function dots(){document.querySelectorAll('.ch').forEach(()=>{});if(!dots._t)dots._t=setTimeout(()=>{dots._t=0;if(S.tab!=='ofi')render()},400)}
+function step(d){const q=S.queue||S.items;if(!q.length)return;let i=q.findIndex(x=>S.cur&&x.id===S.cur.id);i=(i+d+q.length)%q.length;let tries=0;while(tries++<q.length&&status(q[i])==='bad'&&S.hide)i=(i+d+q.length)%q.length;play(q[i])}
+/* ---- controles y pantalla completa ---- */
+let ovT;function showOv(){$('#ov').classList.add('on');clearTimeout(ovT);ovT=setTimeout(()=>$('#ov').classList.remove('on'),3500)}
+$('#ov').addEventListener('click',e=>{if(e.target.closest('button'))return;$('#ov').classList.toggle('on');clearTimeout(ovT);if($('#ov').classList.contains('on'))ovT=setTimeout(()=>$('#ov').classList.remove('on'),3500)});
+$('#pp').onclick=()=>{if(v.paused){v.play();$('#pp').textContent='⏸'}else{v.pause();$('#pp').textContent='▶'}showOv()};
+$('#pv').onclick=()=>{step(-1);showOv()};$('#nx').onclick=()=>{step(1);showOv()};
+$('#fs').onclick=async()=>{const st=$('#stage');try{if(document.fullscreenElement){await document.exitFullscreen()}else{await st.requestFullscreen();try{await screen.orientation.lock('landscape')}catch(e){}}}catch(e){toast('Tu navegador no permite pantalla completa')}};
+let ty=null;$('#stage').addEventListener('touchstart',e=>{ty=e.touches[0].clientY},{passive:true});$('#stage').addEventListener('touchend',e=>{if(ty===null||!document.fullscreenElement)return;const dy=e.changedTouches[0].clientY-ty;ty=null;if(Math.abs(dy)>70){step(dy<0?1:-1)}},{passive:true});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowUp')step(-1);if(e.key==='ArrowDown')step(1)});
+/* ---- verificador ---- */
+function probe(c){return new Promise(res=>{const el=document.createElement('video');el.muted=true;el.preload='metadata';el.playsInline=true;let done=false,h=null;const end=ok=>{if(done)return;done=true;clearTimeout(tm);try{h&&h.destroy()}catch(e){}el.removeAttribute('src');el.load();res(ok)};const tm=setTimeout(()=>end(false),9000);
+  el.addEventListener('loadeddata',()=>end(true));el.addEventListener('canplay',()=>end(true));el.addEventListener('error',()=>end(false));
+  const nat=el.canPlayType('application/vnd.apple.mpegurl');
+  if(!/\.m3u8/i.test(c.u)||nat){el.src=c.u}else{loadHls().then(()=>{if(!Hls.isSupported())return end(false);h=new Hls();h.loadSource(c.u);h.attachMedia(el);h.on(Hls.Events.MANIFEST_PARSED,()=>end(true));h.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal)end(false)})}).catch(()=>end(false))}})}
+let verifying=false;
+$('#vf').onclick=async()=>{
+  if(verifying){verifying=false;return}if(!S.items.length){toast('No hay canales para verificar');return}
+  verifying=true;const q=[...S.items];let n=0,ok=0;const total=q.length,btn=$('#vf');
+  const worker=async()=>{while(verifying&&q.length){const c=q.shift();const r=await probe(c);S.chk[c.id]={ok:r,t:Date.now()};if(r)ok++;n++;btn.textContent=`Verificando ${n}/${total} · toca para parar`}};
+  await Promise.all([worker(),worker(),worker()]);lsS('mt-chk',S.chk);verifying=false;btn.textContent='✔ Verificar señales';toast(ok+' de '+n+' funcionan ahora');render();
+};
+/* ---- pestañas ---- */
+function tabs(){const T=[['vivo','📡 En vivo'],['fav','♥ Favoritos'],['ofi','🏛️ Oficiales']];$('#tabs').innerHTML='';T.forEach(([k,t])=>{const b=document.createElement('button');b.className='tab'+(S.tab===k?' on':'');b.textContent=t;b.onclick=()=>{S.tab=k;tabs();render()};$('#tabs').appendChild(b)});
+  const b=document.createElement('button');b.className='tab'+(S.hide?' on':'');b.textContent=S.hide?'Ocultar sin señal ✓':'Ocultar sin señal';b.onclick=()=>{S.hide=!S.hide;lsS('mt-hide',S.hide);tabs();render()};$('#tabs').appendChild(b)}
+tabs();loadList();
+</script>
+
+<script>if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>
+</body></html>
